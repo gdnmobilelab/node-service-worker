@@ -28,4 +28,4 @@ module.exports = class ServiceWorkerGlobalScope {
     dispatchEvent(ev) {
         return this._events.emit(ev.type, ev);
     }
-}
+};

@@ -1,6 +1,7 @@
-const ServiceWorkerGlobalScope = require('./serviceworker-global-scope');
+const ServiceWorkerGlobalScope = require('./worker/serviceworker-global-scope');
 const getAllKeys = require('./util/get-all-keys');
-const FetchEvent = require('./fetchevent');
+const FetchEvent = require('./worker/fetchevent');
+const url = require('url');
 
 module.exports = class ServiceWorker {
     
@@ -20,11 +21,13 @@ module.exports = class ServiceWorker {
         swCreatorFunction.apply(null, objectsToApplyToGlobal);
     }
 
-    dispatchFetchEvent(url) {
-        let fetchEvent = new FetchEvent(url);
+    dispatchFetchEvent(urlToLoad) {
 
+        urlToLoad = url.resolve(this.globalScope.registration.scope, urlToLoad)
+        let request = new this.globalScope.Request(urlToLoad)
+        let fetchEvent = new FetchEvent(request);
+        
         this.globalScope.dispatchEvent(fetchEvent);
-
         return fetchEvent.resolve()
     }
 

@@ -28,3 +28,25 @@ Then dispatch `FetchEvent`s:
     .then(function(response) {
         // a FetchResponse object, if you're doing it correctly.
     })
+
+## Gobble plugin
+
+There's also a plugin available for [Gobble](https://github.com/gobblejs), allowing you
+to include static HTML copies of service worker fetch events in your build process. Like so:
+
+    var serviceWorkerRender = require('node-service-worker/rollup');
+    
+    gobble('src/js').transform('rollup', {
+        entry: 'sw.js',
+        plugins: rollupPlugins
+    }).transform(serviceWorkerRender, {
+        entry: 'sw.js',
+        scope: "https://localhost/app-demo/",
+        urls: [
+            "./",
+            "./home/"
+        ]
+    })
+
+Files are output relative to scope, so this example would create "index.html" and
+"home/index.html" (index.html is added automatically).
