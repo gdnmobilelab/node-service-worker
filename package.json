@@ -1,0 +1,9 @@
+{
+  "name": "node-service-worker",
+  "version": "0.0.1",
+  "main": "src",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^1.6.3"
+  }
+}
