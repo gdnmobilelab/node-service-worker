@@ -14,7 +14,7 @@ pre-populate pages on (e.g.) S3 for users when they first load.
 Very little. This is a project I'm adding to as and when I need more functionality.
 Right now you can create a service worker like so:
 
-    const ServiceWorker = require('node-service-worker');
+    const {ServiceWorker, FetchEvent} = require('node-service-worker');
 
     const sw = new ServiceWorker(
         scriptURL: 'https://localhost/sw.js'
@@ -24,7 +24,9 @@ Right now you can create a service worker like so:
 
 Then dispatch `FetchEvent`s:
 
-    sw.dispatchFetchEvent('/test/')
+    let fetchEvent = new FetchEvent("http://localhost/test/")
+
+    sw.dispatchEvent(fetchEvent)
     .then(function(response) {
         // a FetchResponse object, if you're doing it correctly.
     })

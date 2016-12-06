@@ -1,4 +1,4 @@
-const ServiceWorker = require('./index');
+const {ServiceWorker, ExtendedEvent, FetchEvent} = require('./index');
 const url = require('url');
 const path = require('path');
 
@@ -19,29 +19,46 @@ module.exports = function(input, output, options, callback) {
             contents: contents
         });
 
-        let absoluteURLsToFetch = options.urls.map((u) => url.resolve(options.scope, u));
-        let fetchPromises = absoluteURLsToFetch.map((u) => {
-            return worker.dispatchFetchEvent(u)
-            .then((res) => {
+        let installEvent = new ExtendedEvent('install');
+        return worker.dispatchEvent(installEvent)
+        .then(() => {
+            let activateEvent = new ExtendedEvent('activate');
+            return worker.dispatchEvent(activateEvent)
+        }).then(() => {
+            let absoluteURLsToFetch = options.urls.map((u) => url.resolve(options.scope, u));
+            let fetchPromises = absoluteURLsToFetch.map((u) => {
 
-                let parsedURL = url.parse(u);
-                let resolveBackToScope = path.relative(scopePath, parsedURL.path);
-               
-                // path.relative strips out trailing /, but we want it
-                if (resolveBackToScope !== "" && parsedURL.path.substr(-1) === '/') {
-                    resolveBackToScope += '/';
-                }
+                let fetchEvent = new FetchEvent(u)
 
-                if (resolveBackToScope.lastIndexOf("/") == resolveBackToScope.length -1) {
-                    resolveBackToScope += "index.html";
-                }
+                return worker.dispatchEvent(fetchEvent)
+                .then((res) => {
 
-                let toWriteTo = path.resolve(output, resolveBackToScope)
-                return this.sander.writeFile(toWriteTo, res.body);
-            })
-        });
+                    let parsedURL = url.parse(u);
+                    let resolveBackToScope = path.relative(scopePath, parsedURL.path);
+                
+                    // path.relative strips out trailing /, but we want it
+                    if (resolveBackToScope !== "" && parsedURL.path.substr(-1) === '/') {
+                        resolveBackToScope += '/';
+                    }
+
+                    if (resolveBackToScope.lastIndexOf("/") == resolveBackToScope.length -1) {
+                        resolveBackToScope += "index.html";
+                    }
+
+                    let toWriteTo = path.resolve(output, resolveBackToScope)
+                    return this.sander.writeFile(toWriteTo, res.body);
+                })
+            });
+            return Promise.all(fetchPromises);
+        })
+        .catch((err) => {
+            worker.globalScope.console.dump();
+            throw err;
+        })
+
         
-        return Promise.all(fetchPromises);
+        
+        
     })
     .then((responses) => {
         callback();

@@ -1,9 +1,12 @@
 {
   "name": "node-service-worker",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "main": "src",
   "license": "MIT",
   "dependencies": {
-    "node-fetch": "^1.6.3"
+    "fake-indexeddb": "^1.0.8",
+    "indexeddbshim": "https://github.com/axemclion/IndexedDBShim.git",
+    "node-fetch": "^1.6.3",
+    "websql": "^0.4.4"
   }
 }

@@ -1,9 +1,16 @@
+const fetch = require('node-fetch');
 
 module.exports = class FetchEvent {
 
     constructor(request) {
         this.type = "fetch";
-        this.request = request;
+
+        if (typeof request === "string") {
+            this.request = new fetch.Request(request);
+        } else {
+            this.request = request;
+        }
+        
     }
 
     respondWith(val) {

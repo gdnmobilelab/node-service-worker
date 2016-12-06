@@ -2,19 +2,29 @@ const BrowserStyleEvents = require('./browser-style-events');
 const EventEmitter = require('events').EventEmitter;
 const fetch = require('node-fetch');
 const CacheStorage = require('./cache-storage');
+const applyIndexedDBTo = require('./indexeddb');
+const Console = require('./console');
 
 module.exports = class ServiceWorkerGlobalScope {
-    constructor() {
+    constructor({scope}) {
         this.fetch = fetch;
         this.Request = fetch.Request;
         this.Response = fetch.Response;
         this._events = new EventEmitter();
+        this.console = new Console();
 
         this.registration = {
-            scope: ""
+            scope: scope
         }
 
-        this.caches = new CacheStorage();
+        this.clients = {
+            claim: function() {
+                
+            }
+        }
+        
+        this.caches = new CacheStorage(scope);
+        applyIndexedDBTo(this);
     }
 
     addEventListener(ev, listener) {
@@ -27,5 +37,9 @@ module.exports = class ServiceWorkerGlobalScope {
 
     dispatchEvent(ev) {
         return this._events.emit(ev.type, ev);
+    }
+
+    skipWaiting() {
+
     }
 };

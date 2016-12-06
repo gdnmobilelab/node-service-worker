@@ -2,33 +2,36 @@ const ServiceWorkerGlobalScope = require('./worker/serviceworker-global-scope');
 const getAllKeys = require('./util/get-all-keys');
 const FetchEvent = require('./worker/fetchevent');
 const url = require('url');
+const ExtendedEvent = require('./worker/extended-event');
 
-module.exports = class ServiceWorker {
+
+class ServiceWorker {
     
     constructor({scriptURL, scope, contents}) {
-        this.globalScope = new ServiceWorkerGlobalScope();
+        this.globalScope = new ServiceWorkerGlobalScope({scope});
+        this.caches = this.globalScope.caches;
         this.globalScope.registration.scope = scope;
 
         let keysToApplyToGlobal = getAllKeys(this.globalScope);
         let objectsToApplyToGlobal = keysToApplyToGlobal.map((key) => this.globalScope[key]);
-
-        // We need to manually add self to this list
-        keysToApplyToGlobal.unshift("self");
-        objectsToApplyToGlobal.unshift(this.globalScope);
-
-        let swCreatorFunction = Function.apply(null, keysToApplyToGlobal.concat(contents));
         
+        // We need to manually add self to this list. global shouldn't also exist, but
+        // if we don't redefine it, the worker can access the Node global scope
+        keysToApplyToGlobal.unshift("global", "self");
+        objectsToApplyToGlobal.unshift(this.globalScope, this.globalScope);
+        
+        let swCreatorFunction = Function.apply(null, keysToApplyToGlobal.concat(contents));
         swCreatorFunction.apply(null, objectsToApplyToGlobal);
     }
-
-    dispatchFetchEvent(urlToLoad) {
-
-        urlToLoad = url.resolve(this.globalScope.registration.scope, urlToLoad)
-        let request = new this.globalScope.Request(urlToLoad)
-        let fetchEvent = new FetchEvent(request);
-        
-        this.globalScope.dispatchEvent(fetchEvent);
-        return fetchEvent.resolve()
+    dispatchEvent(ev) {
+        this.globalScope.dispatchEvent(ev);
+        return ev.resolve()
     }
 
+}
+
+module.exports = {
+    ServiceWorker,
+    FetchEvent,
+    ExtendedEvent
 }
