@@ -83,12 +83,9 @@ You can check which files your service worker has cached on install, using stand
 There's also a plugin available for [Gobble](https://github.com/gobblejs), allowing you
 to include static HTML copies of service worker fetch events in your build process. Like so:
 
-    var serviceWorkerRender = require('node-service-worker/rollup');
+    var serviceWorkerRender = require('node-service-worker/gobble');
     
-    gobble('src/js').transform('rollup', {
-        entry: 'sw.js',
-        plugins: rollupPlugins
-    }).transform(serviceWorkerRender, {
+    gobble('src/js').transform(serviceWorkerRender, {
         entry: 'sw.js',
         scope: "https://localhost/app-demo/",
         urls: [
