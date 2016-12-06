@@ -1,5 +1,5 @@
 module.exports = function(target) {
-    target.fakeIndexedDB = require('fake-indexeddb');
+    target.indexedDB = require('fake-indexeddb');
     target.IDBCursor = require('fake-indexeddb/lib/FDBCursor');
     target.IDBCursorWithValue = require('fake-indexeddb/lib/FDBCursorWithValue');
     target.IDBDatabase = require('fake-indexeddb/lib/FDBDatabase');

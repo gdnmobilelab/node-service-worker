@@ -21,8 +21,8 @@ module.exports = class Console {
     }
 
     dump() {
-        for (entry in this.entries) {
+        this.entries.forEach((entry) => {
             console[entry.level].apply(console, entry.args);
-        }
+        })
     }
 }
