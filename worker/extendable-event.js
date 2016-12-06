@@ -1,4 +1,4 @@
-module.exports = class ExtendedEvent {
+module.exports = class ExtendableEvent {
 
     constructor(type, data) {
         this.type = type;

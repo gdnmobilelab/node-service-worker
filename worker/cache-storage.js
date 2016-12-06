@@ -46,7 +46,7 @@ class ServiceWorkerCache {
     }
 
     keys() {
-        return Promise.resolve(this.caches);
+        return Promise.resolve(this.caches.map((c) => c.name));
     }
 }
 

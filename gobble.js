@@ -1,4 +1,4 @@
-const {ServiceWorker, ExtendedEvent, FetchEvent} = require('./index');
+const {ServiceWorker, ExtendableEvent, FetchEvent} = require('./index');
 const url = require('url');
 const path = require('path');
 
@@ -19,18 +19,22 @@ module.exports = function(input, output, options, callback) {
             contents: contents
         });
 
-        let installEvent = new ExtendedEvent('install');
-        return worker.dispatchEvent(installEvent)
+        let installEvent = new ExtendableEvent('install');
+        worker.dispatchEvent(installEvent);
+        return installEvent.resolve()
         .then(() => {
-            let activateEvent = new ExtendedEvent('activate');
-            return worker.dispatchEvent(activateEvent)
+            let activateEvent = new ExtendableEvent('activate');
+            worker.dispatchEvent(activateEvent);
+            return activateEvent.resolve()
         }).then(() => {
             let absoluteURLsToFetch = options.urls.map((u) => url.resolve(options.scope, u));
             let fetchPromises = absoluteURLsToFetch.map((u) => {
 
-                let fetchEvent = new FetchEvent(u)
+                let fetchEvent = new FetchEvent(u);
 
-                return worker.dispatchEvent(fetchEvent)
+                worker.dispatchEvent(fetchEvent);
+
+                return fetchEvent.resolve()
                 .then((res) => {
 
                     let parsedURL = url.parse(u);
@@ -54,6 +58,21 @@ module.exports = function(input, output, options, callback) {
         .catch((err) => {
             worker.globalScope.console.dump();
             throw err;
+        })
+        .then(() => {
+            return worker.caches.keys()
+            .then((keys) => {
+                let openPromises = keys.map((key) => worker.caches.open(key));
+                return Promise.all(openPromises);
+            })
+            .then((cacheObjects) => {
+                let keysPromises = cacheObjects.map((c) => c.keys());
+                return Promise.all(keysPromises);
+            })
+            .then((cacheEntryArrays) => {
+                let allEntries = Array.prototype.concat.apply([], cacheEntryArrays);
+                console.log(allEntries)
+            })
         })
 
         
