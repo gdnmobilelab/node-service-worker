@@ -5,8 +5,6 @@
   "license": "MIT",
   "dependencies": {
     "fake-indexeddb": "^1.0.8",
-    "indexeddbshim": "https://github.com/axemclion/IndexedDBShim.git",
-    "node-fetch": "^1.6.3",
-    "websql": "^0.4.4"
+    "node-fetch": "^1.6.3"
   }
 }
