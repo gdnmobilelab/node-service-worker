@@ -50,5 +50,5 @@ to include static HTML copies of service worker fetch events in your build proce
         ]
     })
 
-Files are output relative to scope, so this example would create "index.html" and
-"home/index.html" (index.html is added automatically).
+Files are output relative to scope, so this example would create `index.html` and
+`home/index.html` (index.html is added automaticallyto URLs ending with `/`).
