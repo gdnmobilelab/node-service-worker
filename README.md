@@ -1,10 +1,14 @@
-# service-worker-node
+# node-service-worker
 
 An attempt at replicating a Service Worker environment inside Node. Uses:
 
  - [node-fetch](https://www.npmjs.com/package/node-fetch) to emulate the Fetch API.
  - [fakeIndexedDB](https://github.com/dumbmatter/fakeIndexedDB) as an in-memory store to
    replicate IndexedDB.
+
+Install with:
+
+    npm install node-service-worker
 
 ## Why would you make such an abomination?
 
