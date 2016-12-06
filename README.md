@@ -93,7 +93,7 @@ You can check which files your service worker has cached on install, using stand
 Note that it doesn't (yet?) actually cache these files, it just stores which URLs are
 cached.
 
-## `console`
+### `console`
 
 By default any calls to `console.log()` and the like are hidden from view. If you want to
 see what was logged, you can call `console.dump()`. Best to use inside an error handler, like so:
