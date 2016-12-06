@@ -5,6 +5,8 @@ const url = require('url');
 const ExtendableEvent = require('./worker/extendable-event');
 const fetch = require('node-fetch');
 
+const installAndActivate = require('./util/install-and-activate');
+
 class ServiceWorker {
     
     constructor({scriptURL, scope, contents}) {
@@ -50,5 +52,6 @@ module.exports = {
     FetchEvent,
     ExtendableEvent,
     Request: fetch.Request,
-    Response: fetch.Response
+    Response: fetch.Response,
+    installAndActivate: installAndActivate
 }

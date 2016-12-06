@@ -1,7 +1,7 @@
 {
   "name": "node-service-worker",
-  "version": "1.0.0",
-  "main": "src",
+  "version": "2.0.0",
+  "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "fake-indexeddb": "^1.0.8",

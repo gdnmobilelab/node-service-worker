@@ -46,6 +46,15 @@ has executed, if `waitUntil()` has been called, or return immediately if not.
         return activateEvent.resolve();
     })
 
+A utility function is also provided for this, given that it's so common:
+
+    const {installAndActivate} = require('node-service-worker');
+
+    installAndActivate(sw)
+    .then(() => {
+
+    })
+
 Then use the following:
 
 ### `FetchEvent`
@@ -83,6 +92,19 @@ You can check which files your service worker has cached on install, using stand
 
 Note that it doesn't (yet?) actually cache these files, it just stores which URLs are
 cached.
+
+## `console`
+
+By default any calls to `console.log()` and the like are hidden from view. If you want to
+see what was logged, you can call `console.dump()`. Best to use inside an error handler, like so:
+
+    let install = new ExtendableEvent("install");
+    sw.dispatchEvent(install);
+
+    install.resolve()
+    .catch((err) => {
+        sw.console.dump();
+    })
 
 ## Gobble plugin
 
