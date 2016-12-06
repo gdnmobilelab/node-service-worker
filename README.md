@@ -77,6 +77,8 @@ You can check which files your service worker has cached on install, using stand
         console.log(allEntries)
     })
 
+Note that it doesn't (yet?) actually cache these files, it just stores which URLs are
+cached.
 
 ## Gobble plugin
 
