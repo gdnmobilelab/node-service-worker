@@ -6,11 +6,12 @@ const ExtendableEvent = require('./worker/extendable-event');
 const fetch = require('node-fetch');
 
 const installAndActivate = require('./util/install-and-activate');
+const resolveExtendableEvent = require('./util/resolve-extendable-event');
 
 class ServiceWorker {
     
-    constructor({scriptURL, scope, contents}) {
-        this.globalScope = new ServiceWorkerGlobalScope({scope});
+    constructor({scriptURL, scope, contents, interceptFetch}) {
+        this.globalScope = new ServiceWorkerGlobalScope({scope, interceptFetch});
         this.caches = this.globalScope.caches;
         this.globalScope.registration.scope = scope;
 
@@ -53,5 +54,6 @@ module.exports = {
     ExtendableEvent,
     Request: fetch.Request,
     Response: fetch.Response,
-    installAndActivate: installAndActivate
+    installAndActivate,
+    resolveExtendableEvent
 }

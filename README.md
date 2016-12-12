@@ -31,19 +31,20 @@ Right now you can create a service worker like so:
     })
 
 You'll then want to install and activate your worker. For this we use `ExtendableEvent`s,
-which have a **non-standard** function called `resolve()`, which will wait until a Promise
-has executed, if `waitUntil()` has been called, or return immediately if not.
+which will wait until a Promise has executed, if `waitUntil()` has been called, or return 
+immediately if not. They don't have an internal method of resolving in the spec, so we also 
+have a function called resolveExtendableEvent that'll do it for us. Like so:
 
-    const {ExtendableEvent} = require('node-service-worker');
+    const {ExtendableEvent, resolveExtendableEvent} = require('node-service-worker');
 
     let installEvent = new ExtendableEvent("install");
     sw.dispatchEvent(installEvent);
 
-    return installEvent.resolve()
+    return resolveExtendableEvent(installEvent)
     .then(() => {
         let activateEvent = new ExtendableEvent("activate");
         sw.dispatchEvent(activateEvent);
-        return activateEvent.resolve();
+        return resolveExtendableEvent(activateEvent);
     })
 
 A utility function is also provided for this, given that it's so common:
@@ -105,6 +106,25 @@ see what was logged, you can call `console.dump()`. Best to use inside an error 
     .catch((err) => {
         sw.console.dump();
     })
+
+## Fetch interception
+
+I'm still working out the best way to do this. But in browser service workers, the fetch() function
+automatically bypasses the worker (otherwise you'd end up in infinite loops). We need to provide a hook
+to do the same when using this as a server proxy. So, we can do the following:
+
+    const sw = new ServiceWorker({
+        scriptURL: 'https://localhost/sw.js',
+        scope: 'http://localhost',
+        contents: 'console.log("hi");',
+        interceptFetch: function(fetchArgs, fetch) {
+            // fetchArgs is an array of arguments passed. Fetch is the fetch function
+
+            return fetch(fetchArgs[0], fetchArgs[1]) // this would mean we're doing nothing
+        }
+    })
+
+to rewrite / do whatever we want to internal fetch requests. 
 
 ## Gobble plugin
 

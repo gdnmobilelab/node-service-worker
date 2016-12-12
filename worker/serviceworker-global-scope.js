@@ -6,8 +6,23 @@ const applyIndexedDBTo = require('./indexeddb');
 const Console = require('./console');
 
 module.exports = class ServiceWorkerGlobalScope {
-    constructor({scope}) {
-        this.fetch = fetch;
+    constructor({scope, interceptFetch}) {
+
+        if (interceptFetch) {
+            this.fetch = function() {
+                let ret = interceptFetch(arguments, fetch);
+
+                if (!ret || !ret.then) {
+                    return Promise.reject(new Error("You must return a promise in interceptFetch"));
+                }
+
+                return ret;
+
+            }
+        } else {
+            this.fetch = fetch;
+        }
+
         this.Request = fetch.Request;
         this.Response = fetch.Response;
         this._events = new EventEmitter();
