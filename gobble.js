@@ -29,6 +29,11 @@ module.exports = function(input, output, options, callback) {
                 worker.dispatchEvent(fetchEvent);
 
                 return fetchEvent.resolve()
+                .catch((err) => {
+                    console.error("Encoutered worker in worker.");
+                    worker.globalScope.console.dump();
+                    throw err;
+                })
                 .then((res) => {
 
                     let parsedURL = url.parse(u);
@@ -43,14 +48,19 @@ module.exports = function(input, output, options, callback) {
                         resolveBackToScope += "index.html";
                     }
 
-                    let toWriteTo = path.resolve(output, resolveBackToScope)
-                    return this.sander.writeFile(toWriteTo, res.body);
+                    let toWriteTo = path.resolve(output, resolveBackToScope);
+                    return res.buffer()
+                    .then((buffer) => {
+                        return this.sander.writeFile(toWriteTo, buffer);
+                    });
                 })
+                
             });
             return Promise.all(fetchPromises);
         })
         .catch((err) => {
-            worker.globalScope.console.dump();
+            console.log('err?', err.stack)
+            
             throw err;
         })
     })
