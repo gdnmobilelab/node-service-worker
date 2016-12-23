@@ -34,7 +34,10 @@ module.exports = class ServiceWorkerGlobalScope {
 
         this.clients = {
             claim: function() {
-                
+                return Promise.resolve(null)
+            },
+            matchAll: function() {
+                return Promise.resolve([])
             }
         }
         
