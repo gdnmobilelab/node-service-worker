@@ -4,9 +4,28 @@ const fetch = require('node-fetch');
 const CacheStorage = require('./cache-storage');
 const applyIndexedDBTo = require('./indexeddb');
 const Console = require('./console');
+const applyFuncWithGlobals = require('../util/apply-func-with-globals');
+
+
+function createImportScripts(importFunction, globalScope) {
+    return function() {
+
+        // importScripts can be run with an unlimited number of script arguments
+        let scripts = Array.from(arguments);
+
+        scripts.forEach((url) => {
+            // Run our external function that will grab the content of the url
+            // we provide.
+            let scriptContent = importFunction(url);
+
+            // Then execute this function, bound to the global scope.
+            applyFuncWithGlobals(globalScope, scriptContent)
+        })
+    }
+}
 
 module.exports = class ServiceWorkerGlobalScope {
-    constructor({scope, interceptFetch}) {
+    constructor({scope, interceptFetch, importScript}) {
 
         if (interceptFetch) {
             this.fetch = function() {
@@ -23,10 +42,21 @@ module.exports = class ServiceWorkerGlobalScope {
             this.fetch = fetch;
         }
 
+        if (!importScript) {
+            console.warn("No importScript function provided to worker context");
+            importScript = function() {
+                throw new Error("importScript function was not provided to worker context");
+            }
+        }
+
+        this.importScripts = createImportScripts(importScript, this);
+
         this.Request = fetch.Request;
         this.Response = fetch.Response;
         this._events = new EventEmitter();
         this.console = new Console();
+
+        this.self = this;
 
         this.registration = {
             scope: scope
@@ -44,6 +74,7 @@ module.exports = class ServiceWorkerGlobalScope {
         this.caches = new CacheStorage(scope);
         applyIndexedDBTo(this);
     }
+
 
     addEventListener(ev, listener) {
         return this._events.addListener(ev, listener)

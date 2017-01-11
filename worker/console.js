@@ -1,8 +1,10 @@
 const levels = ['info', 'log', 'error', 'warn'];
+const {EventEmitter} = require('events');
 
-module.exports = class Console {
+module.exports = class Console extends EventEmitter {
     
     constructor() {
+        super();
         this.entries = [];
 
         levels.forEach((level) => {
@@ -17,6 +19,10 @@ module.exports = class Console {
                 level: level,
                 args: arguments
             });
+
+            let args = Array.from(arguments);
+            args.unshift(level);
+            this.emit.apply(this, args);
         }
     }
 

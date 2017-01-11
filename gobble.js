@@ -1,12 +1,13 @@
 const {ServiceWorker, installAndActivate, FetchEvent} = require('./index');
 const url = require('url');
 const path = require('path');
+const fs = require('fs');
 
 module.exports = function(input, output, options, callback) {
     
     let jsFile = path.join(input, options.entry);
     let scopePath = url.parse(options.scope).pathname;
-
+    
     this.sander.copydir(input).to(output)
     .then(() => {
         return this.sander.readFile(jsFile, {encoding:'UTF-8'})
@@ -16,16 +17,17 @@ module.exports = function(input, output, options, callback) {
         let worker = new ServiceWorker({
             scriptURL: url.resolve(options.scope, options.entry),
             scope: options.scope,
-            contents: contents
+            contents: contents,
+            importScript: function(url) {
+                return fs.readFileSync(path.join(input, url));
+            }
         });
-
         return installAndActivate(worker)
         .then(() => {
             let absoluteURLsToFetch = options.urls.map((u) => url.resolve(options.scope, u));
             let fetchPromises = absoluteURLsToFetch.map((u) => {
 
                 let fetchEvent = new FetchEvent(u);
-
                 worker.dispatchEvent(fetchEvent);
 
                 return fetchEvent.resolve()
@@ -35,7 +37,6 @@ module.exports = function(input, output, options, callback) {
                     throw err;
                 })
                 .then((res) => {
-
                     let parsedURL = url.parse(u);
                     let resolveBackToScope = path.relative(scopePath, parsedURL.path);
                 

@@ -124,7 +124,27 @@ to do the same when using this as a server proxy. So, we can do the following:
         }
     })
 
-to rewrite / do whatever we want to internal fetch requests. 
+to rewrite / do whatever we want to internal fetch requests.
+
+## importScripts() interception
+
+Similar to fetch, this is experimental and even trickier because it has to be synchronous. But any call
+to `importScripts()` will be separated out into the individual scripts called (because it can contain
+more than one argument) and passed to a function named importScript in the worker initialiser. Like so:
+
+    const sw = new ServiceWorker({
+        scriptURL: 'https://localhost/sw.js',
+        scope: 'http://localhost',
+        contents: 'console.log("hi");',
+        importScript: function(url) {
+            
+            return fs.readFileSync(path.join(__dirname, url));
+
+        }
+    })
+
+The example above assumes the URL is relative, which it may not be. For HTTP requests you might be able to use
+something like https://github.com/ForbesLindesay/sync-request, but I wouldn't really recommend it.
 
 ## Gobble plugin
 
