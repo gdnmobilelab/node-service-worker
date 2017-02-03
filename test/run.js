@@ -1,4 +1,4 @@
-const ServiceWorker = require('../index');
+const {ServiceWorker, FetchEvent, installAndActivate} = require('../index');
 const assert = require('assert');
 
 let sw = new ServiceWorker({
@@ -11,10 +11,25 @@ let sw = new ServiceWorker({
                 "test"
             )
         })
+
+        self.addEventListener('install', (e) => {
+            console.log('dsfsdf')
+            e.waitUntil(undefined)
+        })
     `
 });
 
-sw.dispatchFetchEvent('/test')
-.then((res) => {
-    assert.equal(res, "test")
+installAndActivate(sw)
+.then(() => {
+    let fetchEvent = new FetchEvent('/test');
+
+    sw.dispatchEvent(fetchEvent)
+
+    fetchEvent.resolve()
+    .then((res) => {
+        sw.globalScope.console.dump();
+        assert.equal(res, "test")
+    })
 })
+
+

@@ -48,6 +48,15 @@ class ServiceWorkerCache {
     keys() {
         return Promise.resolve(this.caches.map((c) => c.name));
     }
+
+    delete(name) {
+        let cacheInstance = this.caches.find((c) => c.name === name);
+        if (!cacheInstance) {
+            return;
+        }
+        let indexOfCache = this.caches.indexOf(cacheInstance);
+        this.caches.splice(indexOfCache, 1);
+    }
 }
 
 module.exports = ServiceWorkerCache;
